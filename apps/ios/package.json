@@ -1,0 +1,16 @@
+{
+  "name": "tribemail-ios",
+  "version": "0.2.4",
+  "private": true,
+  "description": "tribeMail iOS app — Tauri v2 shell around the hosted tribeMail web client",
+  "scripts": {
+    "tauri": "tauri",
+    "icons": "tauri icon icon-source/icon.png",
+    "ios:init": "tauri ios init",
+    "ios:dev": "tauri ios dev",
+    "ios:build": "tauri ios build"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2.12.4"
+  }
+}
