@@ -17,7 +17,7 @@ pub struct AppConfig {
     #[serde(default = "default_port")]
     pub port: u16,
 
-    /// IMAP server hostname. Required in production.
+    /// IMAP server hostname. `AppConfig::load` defaults it to Fastmail (tribeMail™).
     #[serde(default)]
     pub imap_host: Option<String>,
 
@@ -25,7 +25,8 @@ pub struct AppConfig {
     #[serde(default = "default_imap_port")]
     pub imap_port: u16,
 
-    /// SMTP server hostname. Required in production.
+    /// SMTP server hostname. `AppConfig::load` defaults it to Fastmail (tribeMail™)
+    /// only when IMAP_HOST is also unset; otherwise it falls back to imap_host.
     #[serde(default)]
     pub smtp_host: Option<String>,
 
@@ -161,6 +162,10 @@ fn default_port() -> u16 {
     3001
 }
 
+/// tribeMail™ default mail provider (Fastmail). Applied by `AppConfig::load`.
+pub const DEFAULT_IMAP_HOST: &str = "imap.fastmail.com";
+pub const DEFAULT_SMTP_HOST: &str = "smtp.fastmail.com";
+
 fn default_imap_port() -> u16 {
     993
 }
@@ -208,9 +213,24 @@ impl AppConfig {
     /// struct fields via case-insensitive matching (e.g. `IMAP_HOST` → `imap_host`).
     #[allow(clippy::result_large_err)]
     pub fn load() -> Result<Self, figment::Error> {
-        Figment::new()
+        let config: Self = Figment::new()
             .merge(Env::raw())
-            .extract()
+            .extract()?;
+        Ok(config.with_fastmail_defaults())
+    }
+
+    /// Fill in Fastmail hosts when no mail server is configured at all.
+    ///
+    /// Only applies when IMAP_HOST is unset, so an operator who points IMAP at
+    /// another provider keeps the existing "SMTP falls back to IMAP host" rule.
+    pub fn with_fastmail_defaults(mut self) -> Self {
+        if self.imap_host.is_none() {
+            self.imap_host = Some(DEFAULT_IMAP_HOST.to_string());
+            if self.smtp_host.is_none() {
+                self.smtp_host = Some(DEFAULT_SMTP_HOST.to_string());
+            }
+        }
+        self
     }
 }
 
@@ -239,6 +259,26 @@ mod tests {
         assert_eq!(config.db_pool_max_connections_per_user, 4);
         assert_eq!(config.db_pool_idle_timeout_secs, 600);
         assert_eq!(config.db_pool_max_users, 500);
+    }
+
+    #[test]
+    fn fastmail_defaults_apply_when_no_hosts_set() {
+        let config: AppConfig = Figment::new().extract().expect("defaults should load");
+        let config = config.with_fastmail_defaults();
+        assert_eq!(config.imap_host.as_deref(), Some(DEFAULT_IMAP_HOST));
+        assert_eq!(config.smtp_host.as_deref(), Some(DEFAULT_SMTP_HOST));
+    }
+
+    #[test]
+    fn fastmail_defaults_respect_custom_imap_host() {
+        let config: AppConfig = Figment::new()
+            .merge(("imap_host", "mail.example.com"))
+            .extract()
+            .expect("should load");
+        let config = config.with_fastmail_defaults();
+        assert_eq!(config.imap_host.as_deref(), Some("mail.example.com"));
+        // SMTP stays unset so it falls back to the IMAP host at login time.
+        assert!(config.smtp_host.is_none());
     }
 
     #[test]

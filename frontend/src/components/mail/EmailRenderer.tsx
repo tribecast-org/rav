@@ -117,6 +117,8 @@ export function EmailRenderer({
 
   const appTheme = useUiStore((state) => state.theme);
   const effectiveAnimationMode = useUiStore((state) => state.effectiveAnimationMode);
+  // Easy mode: the iframe doesn't inherit the app's root font size, so scale it here.
+  const easyMode = useUiStore((state) => state.easyMode);
   const resolvedTheme = theme === "auto" ? appTheme : theme;
   const [prevTrack, setPrevTrack] = useState<{
     surface: "html" | "text" | "empty" | null;
@@ -521,12 +523,13 @@ export function EmailRenderer({
     body {
       padding: 16px !important;
     }
+    ${easyMode ? 'body { zoom: 1.25; }' : ''}
     ${transparentDarkCSS}
     ${adaptiveDarkCSS}
   </style>
 </body>
 </html>`;
-  }, [html, blockRemoteResources, emailTheme, shouldInvert, isDark]);
+  }, [html, blockRemoteResources, emailTheme, shouldInvert, isDark, easyMode]);
 
   const surface: "html" | "text" | "empty" = wrappedHtml ? "html" : text ? "text" : "empty";
   const textSignature = text ? `${text.length}:${text}` : null;

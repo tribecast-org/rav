@@ -1,5 +1,5 @@
 # =============================================================================
-# Rav — Multi-stage Docker build
+# tribeMail™ (Rav fork) — Multi-stage Docker build
 # =============================================================================
 # Stage 1: Frontend static export (Next.js via bun)
 # Stage 2: Backend release build (Rust/Axum)
@@ -74,6 +74,8 @@ ENV DATA_DIR=/data
 ENV PORT=3001
 ENV HOST=0.0.0.0
 ENV BASE_PATH=
+# Mail hosts default to Fastmail inside the binary (AppConfig::load);
+# set IMAP_HOST / SMTP_HOST at runtime (e.g. Railway variables) to override.
 
 EXPOSE 3001
 

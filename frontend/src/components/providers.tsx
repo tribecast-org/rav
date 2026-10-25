@@ -2,11 +2,12 @@
 
 import { QueryClientProvider } from "@tanstack/react-query";
 import { LazyMotion, domAnimation } from "framer-motion";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Toaster } from "sonner";
 import { MotionProvider } from "@/lib/motion/MotionProvider";
 import { clearThemeTransitionArtifacts } from "@/lib/motion/theme-spread";
 import { makeQueryClient } from "@/lib/query-client";
+import { applyEasyMode, loadEasyMode, useUiStore } from "@/stores/useUiStore";
 
 const THEME_STORAGE_KEY = "rav-theme";
 
@@ -27,11 +28,29 @@ function ThemeInitializer() {
   return null;
 }
 
+function EasyModeInitializer() {
+  const easyMode = useUiStore((s) => s.easyMode);
+  const hydrated = useRef(false);
+  useEffect(() => {
+    // The pre-paint script in layout.tsx already set the class; sync the store to it.
+    if (!hydrated.current) {
+      hydrated.current = true;
+      if (loadEasyMode()) {
+        useUiStore.setState({ easyMode: true });
+        return;
+      }
+    }
+    applyEasyMode(easyMode);
+  }, [easyMode]);
+  return null;
+}
+
 export function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(() => makeQueryClient());
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeInitializer />
+      <EasyModeInitializer />
       <LazyMotion features={domAnimation}>
         <MotionProvider>{children}</MotionProvider>
       </LazyMotion>

@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- tribeMail™ logo slot (placeholder). Keep in sync with components/shared/BrandMark.tsx. -->
+  <rect width="64" height="64" rx="14" fill="#f97316"/>
+  <path d="M14 22h36v22a4 4 0 0 1-4 4H18a4 4 0 0 1-4-4z" fill="#fff"/>
+  <path d="M14 22l18 14 18-14" fill="none" stroke="#c2410c" stroke-width="4" stroke-linejoin="round"/>
+  <circle cx="48" cy="18" r="7" fill="#f59e0b" stroke="#fff" stroke-width="3"/>
+</svg>
