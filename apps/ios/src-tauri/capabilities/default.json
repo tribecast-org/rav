@@ -1,0 +1,7 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "Local shell window only. The hosted tribeMail page gets no Tauri IPC access.",
+  "windows": ["main"],
+  "permissions": ["core:default"]
+}

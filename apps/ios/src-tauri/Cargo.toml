@@ -1,0 +1,24 @@
+[package]
+name = "tribemail"
+version = "0.2.4"
+description = "tribeMail iOS shell"
+authors = ["tribecast-org"]
+license = "MIT"
+edition = "2021"
+
+# Standalone crate — not part of the backend's Cargo project.
+[workspace]
+
+[lib]
+# `_lib` suffix avoids a name clash with the bin target on Windows; the
+# staticlib is what the Xcode project links on iOS.
+name = "tribemail_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+tauri-plugin-opener = "2"
+url = "2"
