@@ -12,6 +12,7 @@ import {
   Sun,
   Keyboard,
   LogOut,
+  Type,
 } from "lucide-react";
 import { Tooltip } from "radix-ui";
 import { apiPost } from "@/lib/api";
@@ -23,6 +24,7 @@ import { useUpdateDisplayPreferences } from "@/hooks/useDisplayPreferences";
 import { ConnectionStatus } from "@/components/shared/ConnectionStatus";
 import { useWsStatus } from "@/lib/ws-context";
 import { useQueryClient } from "@tanstack/react-query";
+import { BrandMark } from "@/components/shared/BrandMark";
 
 type NavButtonClickEvent = MouseEvent<Element>;
 
@@ -41,6 +43,8 @@ function NavButton({
 }) {
   const tooltipLabel = disabled ? `${label} (coming soon)` : label;
   const shouldAnimate = useUiStore((s) => s.effectiveAnimationMode) !== "off";
+  // Easy mode spells out every button instead of relying on icon + tooltip.
+  const showLabel = useUiStore((s) => s.easyMode);
 
   return (
     <Tooltip.Root>
@@ -50,7 +54,8 @@ function NavButton({
           onClick={onClick}
           aria-label={tooltipLabel}
           className={cn(
-            "flex size-10 items-center justify-center rounded-lg transition-colors",
+            "flex items-center justify-center rounded-lg transition-colors",
+            showLabel ? "w-full flex-col gap-0.5 px-1 py-1.5 text-xs font-medium" : "size-10",
             disabled
               ? "cursor-not-allowed text-sidebar-foreground/30"
               : "text-sidebar-foreground/70 hover:bg-sidebar-foreground/10 active:bg-sidebar-foreground/15 hover:text-sidebar-foreground",
@@ -58,6 +63,7 @@ function NavButton({
           )}
         >
           {icon}
+          {showLabel && <span className="leading-tight">{label}</span>}
         </button>
       </Tooltip.Trigger>
       <Tooltip.Portal>
@@ -97,6 +103,8 @@ export function NavRail() {
   const effectiveAnimationMode = useUiStore((s) => s.effectiveAnimationMode);
   const updatePrefs = useUpdateDisplayPreferences();
   const resolvedTheme = useResolvedTheme();
+  const easyMode = useUiStore((s) => s.easyMode);
+  const setEasyMode = useUiStore((s) => s.setEasyMode);
 
   const toggleTheme = useCallback((event: NavButtonClickEvent) => {
     const next = resolvedTheme === "dark" ? "light" : "dark";
@@ -123,14 +131,19 @@ export function NavRail() {
 
   return (
     <Tooltip.Provider delayDuration={400}>
-      <div className="relative hidden md:flex h-full w-14 flex-col items-center border-r border-border bg-sidebar py-3">
-        {/* Logo */}
+      <div
+        className={cn(
+          "relative hidden md:flex h-full flex-col items-center border-r border-border bg-sidebar py-3",
+          easyMode ? "w-24 px-1.5" : "w-14",
+        )}
+      >
+        {/* Logo slot */}
         <div className="mb-4 flex size-10 items-center justify-center">
-          <span className="text-lg font-bold text-primary">r.</span>
+          <BrandMark />
         </div>
 
         {/* Top actions */}
-        <div className="flex flex-col items-center gap-1">
+        <div className={cn("flex flex-col items-center gap-1", easyMode && "w-full")}>
           {/* Compose - primary action, visually distinct from nav destinations */}
           <Tooltip.Root>
             <Tooltip.Trigger asChild>
@@ -138,9 +151,15 @@ export function NavRail() {
                 type="button"
                 onClick={() => useComposeStore.getState().openCompose()}
                 aria-label="Compose new message"
-                className="group mb-1 flex size-10 items-center justify-center rounded-full bg-primary/15 text-primary transition-colors hover:bg-primary/25 active:bg-primary/30"
+                className={cn(
+                  "group mb-1 flex items-center justify-center transition-colors",
+                  easyMode
+                    ? "w-full flex-col gap-0.5 rounded-lg bg-primary px-1 py-2 text-xs font-semibold text-primary-foreground hover:bg-primary/90"
+                    : "size-10 rounded-full bg-primary/15 text-primary hover:bg-primary/25 active:bg-primary/30",
+                )}
               >
                 <PenSquare className="size-5" />
+                {easyMode && <span>Write</span>}
               </button>
             </Tooltip.Trigger>
             <Tooltip.Portal>
@@ -162,18 +181,23 @@ export function NavRail() {
             active={viewMode === "mail"}
             onClick={() => setViewMode("mail")}
           />
-          <NavButton
-            icon={<Users className="size-5" />}
-            label="Contacts"
-            active={viewMode === "contacts"}
-            onClick={() => setViewMode(viewMode === "contacts" ? "mail" : "contacts")}
-          />
-          <NavButton
-            icon={<Calendar className="size-5" />}
-            label="Calendar"
-            active={viewMode === "calendar"}
-            onClick={() => setViewMode(viewMode === "calendar" ? "mail" : "calendar")}
-          />
+          {/* Easy mode keeps the chrome to mail + settings */}
+          {!easyMode && (
+            <>
+              <NavButton
+                icon={<Users className="size-5" />}
+                label="Contacts"
+                active={viewMode === "contacts"}
+                onClick={() => setViewMode(viewMode === "contacts" ? "mail" : "contacts")}
+              />
+              <NavButton
+                icon={<Calendar className="size-5" />}
+                label="Calendar"
+                active={viewMode === "calendar"}
+                onClick={() => setViewMode(viewMode === "calendar" ? "mail" : "calendar")}
+              />
+            </>
+          )}
           <NavButton
             icon={<Settings className="size-5" />}
             label="Settings"
@@ -188,7 +212,7 @@ export function NavRail() {
         <ConnectionStatus status={wsStatus} failCount={wsFailCount} />
 
         {/* Bottom actions */}
-        <div className="flex flex-col items-center gap-1">
+        <div className={cn("flex flex-col items-center gap-1", easyMode && "w-full")}>
           <NavButton
             icon={
               resolvedTheme === "dark" ? (
@@ -201,10 +225,18 @@ export function NavRail() {
             onClick={toggleTheme}
           />
           <NavButton
-            icon={<Keyboard className="size-5" />}
-            label="Keyboard shortcuts"
-            onClick={() => useUiStore.getState().setShortcutsOpen(true)}
+            icon={<Type className="size-5" />}
+            label={easyMode ? "Standard view" : "Easy mode"}
+            active={easyMode}
+            onClick={() => setEasyMode(!easyMode)}
           />
+          {!easyMode && (
+            <NavButton
+              icon={<Keyboard className="size-5" />}
+              label="Keyboard shortcuts"
+              onClick={() => useUiStore.getState().setShortcutsOpen(true)}
+            />
+          )}
           <NavButton
             icon={<LogOut className="size-5" />}
             label="Logout"

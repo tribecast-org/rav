@@ -99,7 +99,9 @@ build/
 # =============================================================================
 _bmad/
 _bmad-output/
-docs/
+docs/*
+# tribeMail™: the product spec is tracked
+!docs/SPEC-tribemail-app-v1.md
 
 # Extras
 frontend/public/stickers

@@ -44,6 +44,24 @@ function saveSettings(settings: Partial<PersistedSettings>) {
 
 export type ThemeMode = "light" | "dark" | "system";
 
+/** localStorage key for Easy mode (large type + high contrast + simplified chrome). */
+export const EASY_MODE_STORAGE_KEY = "tribemail-easy-mode";
+
+export function loadEasyMode(): boolean {
+  if (typeof window === "undefined") return false;
+  try {
+    return localStorage.getItem(EASY_MODE_STORAGE_KEY) === "on";
+  } catch {
+    return false;
+  }
+}
+
+/** Reflects Easy mode onto <html> so CSS tokens and type scale follow it. */
+export function applyEasyMode(on: boolean) {
+  if (typeof document === "undefined") return;
+  document.documentElement.classList.toggle("easy", on);
+}
+
 const DEFAULT_EFFECTIVE_ANIMATION_MODE: AnimationMode = "medium";
 
 export interface AnimationModeState {
@@ -59,6 +77,8 @@ export interface UiState {
   readingPaneVisible: boolean;
   density: "compact" | "comfortable";
   theme: ThemeMode;
+  /** Easy mode: large type, high contrast, simplified chrome. Per-device, persisted. */
+  easyMode: boolean;
   searchQuery: string;
   searchActive: boolean;
   viewMode: "mail" | "contacts" | "settings" | "calendar";
@@ -87,6 +107,7 @@ export interface UiState {
   setReadingPaneVisible: (visible: boolean) => void;
   setDensity: (density: "compact" | "comfortable") => void;
   setTheme: (theme: ThemeMode) => void;
+  setEasyMode: (on: boolean) => void;
   setSearchQuery: (query: string) => void;
   setSearchActive: (active: boolean) => void;
   clearSearch: () => void;
@@ -119,6 +140,8 @@ export const useUiStore: UseBoundStore<StoreApi<UiState>> = create<UiState>((set
   readingPaneVisible: true,
   density: "comfortable",
   theme: "system",
+  // Hydrated from localStorage on mount (EasyModeInitializer) to keep SSR markup stable.
+  easyMode: false,
   searchQuery: "",
   searchActive: false,
   viewMode: "mail",
@@ -153,6 +176,15 @@ export const useUiStore: UseBoundStore<StoreApi<UiState>> = create<UiState>((set
   setReadingPaneVisible: (visible) => set({ readingPaneVisible: visible }),
   setDensity: (density) => set({ density }),
   setTheme: (theme) => set({ theme }),
+  setEasyMode: (on) => {
+    try {
+      localStorage.setItem(EASY_MODE_STORAGE_KEY, on ? "on" : "off");
+    } catch {
+      // ignore
+    }
+    applyEasyMode(on);
+    set({ easyMode: on });
+  },
   setSearchQuery: (query) => set({ searchQuery: query }),
   setSearchActive: (active) => set({ searchActive: active }),
   clearSearch: () => set({ searchQuery: "", searchActive: false, searchResultCount: null }),

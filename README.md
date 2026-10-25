@@ -1,3 +1,10 @@
+> **tribeMail™ (tribeMail.app)** — this branch is tribeCast™'s member-facing webmail, a fork of
+> [naust-mail/rav](https://github.com/naust-mail/rav) (itself a fork of [c0h1b4/oxi](https://github.com/c0h1b4/oxi)), MIT-licensed.
+> tribeMail™ ships with Fastmail defaults (`IMAP_HOST=imap.fastmail.com`, `SMTP_HOST=smtp.fastmail.com`, env-overridable),
+> the tribeCast™ orange/amber palette, and an **Easy mode** (large type, high contrast, simplified chrome).
+> Deploy target: Railway (`railway.json`, port 3001, volume `/data`). Spec: [docs/SPEC-tribemail-app-v1.md](docs/SPEC-tribemail-app-v1.md).
+> Upstream README follows unchanged.
+
 <div align="center">
 
 # Rav

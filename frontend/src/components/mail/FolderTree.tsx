@@ -615,6 +615,7 @@ export function FolderTree() {
   const { data, isLoading, isError, refetch } = useFolders();
   const { data: quota } = useQuota();
   const setViewMode = useUiStore((s) => s.setViewMode);
+  const easyMode = useUiStore((s) => s.easyMode);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [renamingFolder, setRenamingFolder] = useState<string | null>(null);
   // Set of folder names that are currently collapsed.  Empty = all expanded.
@@ -677,21 +678,23 @@ export function FolderTree() {
           </div>
         )}
 
-        {/* Tags section */}
-        <TagSection />
+        {/* Tags section (hidden in Easy mode's simplified chrome) */}
+        {!easyMode && <TagSection />}
       </nav>
 
       {/* New folder button + settings + mailbox space */}
       <div className="border-t border-sidebar-border p-2">
-        <Button
-          variant="ghost"
-          size="sm"
-          className="w-full justify-start gap-2 text-muted-foreground hover:text-foreground"
-          onClick={() => setCreateDialogOpen(true)}
-        >
-          <FolderPlus className="size-4" />
-          New folder
-        </Button>
+        {!easyMode && (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="w-full justify-start gap-2 text-muted-foreground hover:text-foreground"
+            onClick={() => setCreateDialogOpen(true)}
+          >
+            <FolderPlus className="size-4" />
+            New folder
+          </Button>
+        )}
         <Button
           variant="ghost"
           size="sm"

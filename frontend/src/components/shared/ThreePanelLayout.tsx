@@ -12,6 +12,7 @@ import { MessageActionBar } from "@/components/mail/MessageActionBar";
 import { isValidCommittedSearch } from "@/lib/search-parser";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import { MobileHeader } from "@/components/shared/MobileHeader";
+import { BrandMark, BrandWordmark } from "@/components/shared/BrandMark";
 
 interface ThreePanelLayoutProps {
   sidebar: React.ReactNode;
@@ -288,10 +289,9 @@ export function ThreePanelLayout({
               {selectedMessageUid !== null ? (
                 <div className="flex min-h-0 flex-1">{readingPane}</div>
               ) : (
-                <div className="flex h-full w-full items-center justify-center">
-                  <span className="text-2xl font-bold tracking-tight text-muted-foreground/40 select-none">
-                    Rav
-                  </span>
+                <div className="flex h-full w-full flex-col items-center justify-center gap-3 select-none opacity-50">
+                  <BrandMark className="size-12 grayscale" />
+                  <BrandWordmark className="text-2xl text-muted-foreground" />
                 </div>
               )}
             </section>

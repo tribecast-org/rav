@@ -14,6 +14,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { apiPost, fetchAccounts } from "@/lib/api";
 import { useAuthStore } from "@/stores/useAuthStore";
+import { useUiStore } from "@/stores/useUiStore";
+import { BrandMark, BrandWordmark } from "@/components/shared/BrandMark";
 import { useQueryClient } from "@tanstack/react-query";
 import type {
   LoginResponse,
@@ -103,6 +105,9 @@ function getCookie(name: string): string | null {
 
 type LoginStep = "email" | "password" | "totp";
 
+/** Fastmail's Privacy & Security page, where members create an app password. */
+const FASTMAIL_APP_PASSWORD_URL = "https://app.fastmail.com/settings/security";
+
 // ---------------------------------------------------------------------------
 // Page
 // ---------------------------------------------------------------------------
@@ -112,6 +117,8 @@ export default function Home() {
   const queryClient = useQueryClient();
   const setAccounts = useAuthStore((s) => s.setAccounts);
   const setActiveAccount = useAuthStore((s) => s.setActiveAccount);
+  const easyMode = useUiStore((s) => s.easyMode);
+  const setEasyMode = useUiStore((s) => s.setEasyMode);
 
   const [checking, setChecking] = useState(true);
   const [step, setStep] = useState<LoginStep>("email");
@@ -276,9 +283,10 @@ export default function Home() {
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="w-full max-w-sm">
         {/* Branding */}
-        <div className="mb-8 text-center">
-          <h1 className="text-3xl font-bold tracking-tight text-foreground">
-            Rav
+        <div className="mb-8 flex flex-col items-center text-center">
+          <BrandMark className="mb-3 size-14" />
+          <h1 className="text-3xl text-foreground">
+            <BrandWordmark />
           </h1>
           <p className="mt-2 text-sm text-muted-foreground">
             Sign in to your account
@@ -364,11 +372,11 @@ export default function Home() {
                 className="flex flex-col gap-4"
               >
                 <div className="flex flex-col gap-2">
-                  <Label htmlFor="password">Password</Label>
+                  <Label htmlFor="password">App password</Label>
                   <Input
                     id="password"
                     type="password"
-                    placeholder="Enter your password"
+                    placeholder="Enter your Fastmail app password"
                     autoComplete="current-password"
                     required
                     disabled={loading}
@@ -404,6 +412,21 @@ export default function Home() {
                 </Button>
 
               </form>
+            )}
+
+            {step !== "totp" && (
+              <p className="mt-4 text-xs text-muted-foreground">
+                tribeMail™ signs in with a Fastmail app password, not your regular one —{" "}
+                <a
+                  href={FASTMAIL_APP_PASSWORD_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-medium text-primary hover:underline"
+                >
+                  create one in Fastmail settings
+                </a>
+                .
+              </p>
             )}
 
             {/* ---- TOTP step ---- */}
@@ -459,9 +482,20 @@ export default function Home() {
           </CardContent>
         </Card>
 
-        <p className="mt-6 text-center text-xs text-muted-foreground">
-          Secure, private, and fast email.
-        </p>
+        <div className="mt-6 flex flex-col items-center gap-3 text-center">
+          <button
+            type="button"
+            role="switch"
+            aria-checked={easyMode}
+            onClick={() => setEasyMode(!easyMode)}
+            className="rounded-md border border-border px-3 py-1.5 text-sm font-medium text-foreground hover:bg-accent"
+          >
+            {easyMode ? "Easy mode: on" : "Larger text (Easy mode)"}
+          </button>
+          <p className="text-xs text-muted-foreground">
+            tribeMail™ from tribeCast™ · built on the open-source Rav webmail
+          </p>
+        </div>
       </div>
     </div>
   );

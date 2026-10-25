@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback } from "react";
-import { Code2, FileText, Loader2, Monitor, Moon, Search, Sun } from "lucide-react";
+import { Code2, FileText, Loader2, Monitor, Moon, Search, Sun, Type } from "lucide-react";
 import { toast } from "sonner";
 import {
   useDisplayPreferences,
@@ -62,6 +62,8 @@ export function DisplaySettings() {
   const setTheme = useUiStore((s) => s.setTheme);
   const setComposeFormat = useUiStore((s) => s.setComposeFormat);
   const effectiveAnimationMode = useUiStore((s) => s.effectiveAnimationMode);
+  const easyMode = useUiStore((s) => s.easyMode);
+  const setEasyMode = useUiStore((s) => s.setEasyMode);
 
   const handleDensityChange = useCallback(
     (density: "compact" | "comfortable") => {
@@ -151,6 +153,17 @@ export function DisplaySettings() {
       </div>
 
       <div className="space-y-3">
+        <SegmentedControl
+          label="Easy mode"
+          description="Larger text, stronger contrast, and fewer buttons. Saved on this device."
+          value={easyMode ? "easy" : "standard"}
+          options={[
+            { value: "standard", label: "Standard" },
+            { value: "easy", label: "Easy", icon: <Type className="size-3.5" /> },
+          ]}
+          onChange={(v) => setEasyMode(v === "easy")}
+        />
+
         <SegmentedControl
           label="Density"
           description="Controls the spacing of the message list"

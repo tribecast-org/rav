@@ -15,9 +15,12 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Rav",
-  description: "A modern email client built with Rust and Next.js",
+  title: "tribeMail™",
+  description: "tribeMail™ — email from tribeCast™",
 };
+
+// Applies Easy mode before first paint so large type / high contrast never flashes.
+const EASY_MODE_BOOT = `try{if(localStorage.getItem("tribemail-easy-mode")==="on")document.documentElement.classList.add("easy")}catch(e){}`;
 
 export default function RootLayout({
   children,
@@ -26,6 +29,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: EASY_MODE_BOOT }} />
+      </head>
       <body
         className={`${inter.variable} ${jetbrainsMono.variable} font-sans antialiased`}
       >
